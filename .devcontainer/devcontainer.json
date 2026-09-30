@@ -1,0 +1,11 @@
+{
+  "name": "Live View Runner",
+  "image": "mcr.microsoft.com/devcontainers/universal:latest",
+  "forwardPorts": [6081],
+  "portsAttributes": {
+    "6081": {
+      "label": "Remote Desktop",
+      "onAutoForward": "notify"
+    }
+  }
+}

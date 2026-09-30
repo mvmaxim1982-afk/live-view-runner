@@ -1,2 +1,27 @@
-# live-view-runner
-GUI runner for opening remote browser Live View sessions in GitHub Codespaces.
+# Live View Runner
+
+Облачная GUI-среда для открытия Live URL браузерных сессий через GitHub Codespaces.
+
+## Запуск
+
+1. Открой этот репозиторий в GitHub.
+2. Нажми **Code → Codespaces → Create codespace on main**.
+3. После запуска открой встроенный Terminal.
+4. Выполни:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+5. В панели **Ports** найди порт **6081** и открой его в браузере.
+6. Откроется удалённый Linux-десктоп с Firefox.
+7. В Firefox можно открыть Live URL браузерной сессии.
+
+## Важно
+
+Codespaces предоставляет удалённую вычислительную среду. Фактическая доступность Live URL и сетевой маршрут зависят от сервиса, его ограничений и настроек Codespaces; наличие Codespace само по себе не гарантирует обход любой блокировки.
+
+## Остановка
+
+После работы останови Codespace через GitHub, чтобы не расходовать вычислительное время.
