@@ -1,11 +1,15 @@
 {
-  "name": "Live View Runner",
+  "name": "Live View Runner + DeepSeek Harness",
   "image": "mcr.microsoft.com/devcontainers/universal:latest",
-  "forwardPorts": [6081],
+  "forwardPorts": [6081, 3080],
   "portsAttributes": {
     "6081": {
       "label": "Remote Desktop",
       "onAutoForward": "notify"
+    },
+    "3080": {
+      "label": "DeepSeek Harness (loopback)",
+      "onAutoForward": "silent"
     }
   }
 }

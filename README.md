@@ -1,27 +1,57 @@
-# Live View Runner
+# Live View Runner + DeepSeek Harness
 
-Облачная GUI-среда для открытия Live URL браузерных сессий через GitHub Codespaces.
+Remote GUI environment for GitHub Codespaces with DeepSeek Harness (DSH).
 
-## Запуск
+## Start
 
-1. Открой этот репозиторий в GitHub.
-2. Нажми **Code → Codespaces → Create codespace on main**.
-3. После запуска открой встроенный Terminal.
-4. Выполни:
+1. Open the repository in GitHub Codespaces and create a Codespace on `main`.
+2. In the terminal run:
 
 ```bash
 chmod +x setup.sh
 ./setup.sh
 ```
 
-5. В панели **Ports** найди порт **6081** и открой его в браузере.
-6. Откроется удалённый Linux-десктоп с Firefox.
-7. В Firefox можно открыть Live URL браузерной сессии.
+3. Open the forwarded **6081** port for the remote desktop.
+4. Firefox inside the remote desktop opens DSH automatically.
 
-## Важно
+## DeepSeek Harness security rule
 
-Codespaces предоставляет удалённую вычислительную среду. Фактическая доступность Live URL и сетевой маршрут зависят от сервиса, его ограничений и настроек Codespaces; наличие Codespace само по себе не гарантирует обход любой блокировки.
+DSH is intentionally kept on loopback:
 
-## Остановка
+```
+http://127.0.0.1:3080
+```
 
-После работы останови Codespace через GitHub, чтобы не расходовать вычислительное время.
+Do **not** start it with `--host 0.0.0.0`. The current DSH web app rejects that mode because it would expose its remote-code-execution surface to the network.
+
+For browser use, open:
+
+```
+http://localhost:3080
+```
+
+Using `localhost` is important because current Chromium-based browsers can send a port-less Origin for `127.0.0.1`, which can trigger DSH's Host/Origin trust fence and produce HTTP 403 responses.
+
+## Ports
+
+- **6081** — noVNC remote desktop
+- **3080** — DSH loopback service; it is forwarded for Codespaces tooling, but DSH itself still binds to loopback.
+
+## Logs
+
+If DSH does not start:
+
+```bash
+cat /tmp/dsh.log
+```
+
+GUI logs:
+
+```bash
+cat /tmp/xvfb.log
+cat /tmp/xfce.log
+cat /tmp/x11vnc.log
+cat /tmp/novnc.log
+cat /tmp/firefox.log
+```
