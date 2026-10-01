@@ -10,15 +10,25 @@ sudo apt-get install -y --no-install-recommends \
   xfce4 xfce4-terminal \
   xvfb x11vnc \
   novnc websockify \
-  firefox-esr dbus-x11 \
+  dbus-x11 \
   curl
+
+echo "==> Installing Firefox from Mozilla's official Linux build..."
+if ! command -v firefox >/dev/null 2>&1; then
+  tmpdir="$(mktemp -d)"
+  curl -fsSL "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US" -o "$tmpdir/firefox.tar.xz"
+  sudo rm -rf /opt/firefox
+  sudo tar -xJf "$tmpdir/firefox.tar.xz" -C /opt
+  sudo ln -sfn /opt/firefox/firefox /usr/local/bin/firefox
+  rm -rf "$tmpdir"
+fi
 
 echo "==> Stopping old GUI processes if present..."
 pkill -f "Xvfb :1" || true
 pkill -f "x11vnc.*5901" || true
 pkill -f "websockify.*6081" || true
-pkill -f "firefox-esr" || true
-pkill -f "@deepseek-ai/dsh.*web" || true
+pkill -f "firefox" || true
+pkill -f "@deepseek-ai/dsh" || true
 
 echo "==> Starting virtual display..."
 Xvfb :1 -screen 0 1280x800x24 -ac +extension GLX +render -noreset >/tmp/xvfb.log 2>&1 &
@@ -50,7 +60,7 @@ for i in {1..30}; do
 done
 
 echo "==> Starting Firefox inside the remote desktop..."
-DISPLAY=:1 firefox-esr --no-remote http://localhost:3080 >/tmp/firefox.log 2>&1 &
+DISPLAY=:1 firefox --no-remote http://localhost:3080 >/tmp/firefox.log 2>&1 &
 
 echo
 echo "=============================================="
