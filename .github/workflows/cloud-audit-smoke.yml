@@ -1,0 +1,64 @@
+name: Read-only cloud audit (no login, no trading)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public_site_check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect public websites and save verifiable results
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, re, datetime
+          from urllib.request import Request, urlopen
+          from urllib.error import HTTPError, URLError
+          from pathlib import Path
+          
+          targets = [
+              "https://offdom.ru/",
+              "https://offdom.ru/robots.txt",
+              "https://kwork.ru/categories/audit/seo-audit",
+          ]
+          now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+          results = []
+          for url in targets:
+              row = {"requested_url": url, "checked_at_utc": now}
+              try:
+                  req = Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; ReadOnlyAgentCheck/1.0)"})
+                  with urlopen(req, timeout=12) as resp:
+                      body = resp.read(131072).decode("utf-8", "replace")
+                      match = re.search(r"<title[^>]*>(.*?)</title>", body, re.I | re.S)
+                      row.update({
+                          "http_status": resp.status,
+                          "final_url": resp.url,
+                          "title": re.sub(r"\s+", " ", match.group(1)).strip() if match else None,
+                          "sample_chars": len(body),
+                      })
+              except HTTPError as e:
+                  row.update({"http_status": e.code, "error": str(e.reason)})
+              except (URLError, TimeoutError, OSError) as e:
+                  row.update({"http_status": None, "error": str(e)[:220]})
+              results.append(row)
+          Path("report.json").write_text(json.dumps({
+              "type": "read_only_cloud_audit_smoke_test",
+              "is_trading": False,
+              "api_keys_used": False,
+              "timestamp_utc": now,
+              "results": results,
+          }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(json.dumps(results, ensure_ascii=False, indent=2))
+          PY
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: independent-cloud-audit
+          path: report.json
+          retention-days: 1
+          if-no-files-found: warn
